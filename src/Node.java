@@ -1,6 +1,6 @@
 // 2-d point represented as a node
 
-public class Node {
+public class Node implements Comparable {
     private int x;
     private int y;
 
@@ -23,5 +23,16 @@ public class Node {
 
     public int getY() {
         return y;
+    }
+    
+    public int compareTo(Node comp) {
+        int compare = comp.getX();
+
+        return this.x - compare;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
     }
 }
