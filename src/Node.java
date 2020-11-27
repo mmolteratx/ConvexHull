@@ -24,9 +24,10 @@ public class Node implements Comparable {
     public int getY() {
         return y;
     }
-    
-    public int compareTo(Node comp) {
-        int compare = comp.getX();
+
+    @Override
+    public int compareTo(Object comp) {
+        int compare = ((Node)comp).getX();
 
         return this.x - compare;
     }
