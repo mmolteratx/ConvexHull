@@ -30,7 +30,7 @@ public class Set {
 
         return stack.toArray();
     }
-
+    /*
     public static void main(String[] args) {
         ArrayList<Node> field = new ArrayList<Node>();
         field.add(new Node(0, 0));
@@ -42,5 +42,5 @@ public class Set {
 
         Set testSet = new Set(field);
         System.out.println(testSet.upperHull());
-    }
+    }*/
 }
