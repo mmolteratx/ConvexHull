@@ -19,11 +19,11 @@
 Austin, TX \\
 m.molter@utexas.edu}
 \and
-\IEEEauthorblockN{Joaquin Garrido}
+\IEEEauthorblockN{Joaquin Ambia Garrido, ja43578}
 \IEEEauthorblockA{\textit{Cockrell School of Engineering} \\
 \textit{University of Texas at Austin}\\
 Austin, TX \\
-email address or ORCID}
+ambia@utexas.edu}
 }
 
 \maketitle
@@ -33,6 +33,13 @@ This serves as a summary of the fall 2020 semester project for Multicore Computi
 \end{abstract}
 
 \section{Introduction}
+The convex hull algorithm has been fairly extensively examined in the literature dating back at least to the 1970s. The premise behind the problem is that given an arbitrary set of points, the convex hull is the smallest convex set that contains it. This means that given any two points within the hull, the entirety of the line that connects them is contained within the hull. It is an interesting problem in geometry with applications in numerous spaces, such as image processing, scientific computing (in particular quantum mechanics), and economic analysis.
+
+It has been noted that despite the large number of serial algorithms for the computation of the convex hull, there are a surprisingly small number of parallel algorithms. Most parallel algorithms can be divided into one of two categories: 
+\begin{enumerate}
+    \item divide and conquer, where numerous smaller hulls are found and then combined into a single hull, as examined in [1] and [2]
+    \item parallelization of iterative sequential algorithms, as examined in [3] and [4]
+\end{enumerate} 
 
 \section{Summary of Convex Hull}
 
@@ -43,5 +50,13 @@ This serves as a summary of the fall 2020 semester project for Multicore Computi
 \section{Parallelization Approach 2}
 
 \section{References}
+\begin{thebibliography}{00}
+\bibitem{b1} M. Nakagawa, D. Man, Y. Ito, and K. Nakano, “A Simple Parallel Convex Hulls Algorithm for Sorted Points and the Performance Evaluation on the Multicore Processors,” Hiroshima University. [Online]. [Accessed: 11-Nov-2020].
+\bibitem{b2} J. Ramesh and S. Suresha, “Convex Hull - Parallel and Distributed Algorithms,” Stanford.edu,
+2016. [Online]. [Accessed: 11-Nov-2020].
+\bibitem{b3} R. Miller and Q. F. Stout, “Efficient parallel convex hull algorithms,” IEEE Transactions on Computers, vol. 37, no. 12, pp. 1605–1618, 1988.
+\bibitem{b4} J. Liu, “Parallel Algorithms for Constructing Convex Hulls,” dissertation, LSU Historical Dissertations and Theses, Baton Rouge, LA, 1995.
+\end{thebibliography}
+
 
 \end{document}
