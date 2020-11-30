@@ -30,7 +30,13 @@ public class Set {
             stack.push(set.get(i));
         }
 
-        return stack.toArray();
+        // put in correct order in array list
+        ArrayList<Node> hull = new ArrayList<>();
+        while(stack.size() > 0) {
+            hull.add(0, stack.pop());
+        }
+
+        return hull;
     }
 
     public ArrayList<Node> findTangent(Set s2) {
@@ -107,5 +113,5 @@ public class Set {
         System.out.println(testSet2.upperHull());
 
         System.out.println(testSet.findTangent(testSet2));
-    } */
+    }*/
 }
