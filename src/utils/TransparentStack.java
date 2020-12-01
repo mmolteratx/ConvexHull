@@ -11,7 +11,6 @@ public class TransparentStack {
 
     public void push(Node n) {
         stack.add(0, n);
-        System.out.println(stack);
     }
 
     public Node top() {
@@ -21,7 +20,6 @@ public class TransparentStack {
     public Node pop() {
         Node top = top();
         stack.remove(0);
-        System.out.println(stack);
         return top;
     }
 
