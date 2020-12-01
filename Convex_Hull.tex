@@ -45,30 +45,60 @@ It has been noted that despite the large number of serial algorithms for the com
 
 
 \section{Serial Algorithm}
+
 In the serial algorithm, a stack is used to detect concavity and remove points from the hull. There is only one assumption made by this algorithm: that the points have already been sorted in increasing order by x-value. 
 
-The algorithm begins by finding the left most and right most points, a trivial exercise since the points have already been sorted by their horizontal position. It then effectively draws a line between the two points, and points above that line are put into the group for what will be referred to as the $upper hull$ and points below that line are moved into the $lower hull$. Once the upper/lower sets have been created, we can begin the algorithm to calculate the hull. The method is effectively the same for the upper and lower sets, so we will discuss only the upper in detail for brevity.
+\subsection{TransparentStack}
+The stack used is for the most part one that the reader will be familiar with, but it has one addition that is worth mentioning for clarity ahead of time. The sole addition is that in addition to the familiar $push/pop/peek$ methods normally performed by a stack, this stack has an additional $second$ method, which will return not the top value, but the value underneath, hence the name $TransparentStack$. This is critical for allowing us to determine concavity in a simple fashion.
 
-As a quick aside, the stack used is for the most part one that the reader will be familiar with. The sole exception is that in addition to the familiar $push/pop/peek$ methods normally performed by a stack, this stack has an additional $second$ method, which will return not the top value, but the value underneath. This is critical for allowing us to determine concavity.
+Our stack is implemented using the $ArrayList$ class in Java. This allows for push/pop/peek/second to execute in $O(1)$ time. The implementation is of the standard type that is easily found in text books and online.
 
-To begin with, the first two elements are pushed onto the stack. Once there are two elements, we can proceed with comparison. The next element in line to be pushed to the stack is taken with the $second$ element in order to form a virtual line. We then examine the $top$ element in relation to this line, in our algorithm, via projection. If the $top$ element in the stack is above this line, then the surface formed by the three elements in comparison is convex. This means there is no action to be performed, so the next element is pushed onto the stack and the comparison repeated.
+\subsection{Hull Algorithm}
+The algorithm begins by finding the left most and right most points, a trivial exercise that can be completed in $O(1)$ time since the points have already been sorted by their horizontal position. It then effectively draws a line between the two points, and points above that line are put into the group for what will be referred to as the $upper hull$ and points below that line are moved into the $lower hull$. Once the upper/lower sets have been created, we can begin the algorithm to calculate the hull. The method is effectively the same for the upper and lower sets, so we will discuss only the upper hull algorithm in detail for brevity.
 
-If the $top$ element happens to be below the line formed by the $second$ element and the next element, then this is evidence of a concave surface. In order to remedy this, the $top$ element is popped from the stack before pushing the next element on to the stack. Again, the comparison is then repeated.
+To begin with, the first two elements are pushed onto the stack. Once there are two elements, we can proceed with comparison. The next element in line to be pushed to the stack is taken with the $second$ element in order to form a virtual line. This is done simply by calculating the slope and the $y$-intercept point with the formula $slope = (y_2 - y_1)/(x_2 - x_1)$, and $intercept = y_1 - slope * x_1$, that many will remember from their introductory algebra course.
 
-This algorithm ends when we reach the furthest most right point of the set. Once that occurs, the hull is considered found. As stated above, the lower hull algorithm proceeds in a nearly identical manner, just with opposite orientation. In the serial algorithm, the lower hull is found after the upper hull has finished. Each hull is found in $O(n)$ time. This should be obvious, as each element can be at most pushed once, and at most popped once. Once both hulls have been found, the connecting point is the left/right extremities, so combination can occur in $O(n)$ time as well if copying elements.
+We then examine the $top$ element in relation to this line, in our algorithm, via projection. This is done by finding the $y$ value using the formula $y = slope * x + intercept$. If the $y$ value of that point is greater than the $y$ value of its projection, then it is above the line; if it is equal or lesser, then it is considered below the line. If the $top$ element in the stack is above this line, then the surface formed by the three elements in comparison is convex. This can be easily visualized by drawing the resulting figure, examples of which can be seen in figure 1. This means that there is no action to be performed, so the next element is pushed onto the stack and the comparison repeated.
+
+If the $top$ element happens to be on or below the line formed by the $second$ element and the next element, then this is evidence of a concave surface. In order to remedy this, the $top$ element is popped from the stack before pushing the next element on to the stack. Again, the comparison is then repeated until all points have been evaluated.
+
+This algorithm ends when we reach the furthest most right point of the set, which means that the entire set has been evaluated since it is sorted. Once that occurs, the hull is considered found. As stated above, the lower hull algorithm proceeds in a nearly identical manner, just with opposite orientation. In the serial algorithm, the lower hull is found after the upper hull has finished. Each hull is found in $O(n)$ time. This should be obvious, as each element can be at most pushed once, and at most popped once. Once both hulls have been found, the connecting point is the left/right extremities, so combination can occur in $O(n)$ time as well if copying elements.
+
+Pseudocode:
 
 As can be seen above, given a sorted set of elements, a convex hull in $O(n)$ time is trivial. However, sorting is a $O(nlog(n)$ problem at best, which dominates the run time on large datasets. As a result, comparisons will be made to the parallel algorithm only in the portion in which the hull is actually calculated. Comparison of sorting algorithms is beyond the scope of this paper.
 
 \section{Parallelization Approach 1 - Divide and Conquer}
-The divide in conquer section is a relatively straightforward approach to parallelization, and likely the first idea that one would have if they were assigned the task of making a parallel algorithm for convex hull computation. Given a set $S$ of points, and $n$ processes, $S$ is divided into $n$ equal sets. The upper hull of each set is found, and then the hulls are connected to each other in order to find a complete convex hull of the entire set.
+The divide-and-conquer method is a relatively straightforward approach to parallelization, and likely the first idea that one would have if they were assigned the task of making a parallel algorithm for convex hull computation. Our approach is found in [1] and [2] in slightly different presentations. [1] gives the method by dividing the upper/lower hull into horizotnal subsets, which is the exact method which we implemented, and is described below. 
 
-This approach offers the advantage that it is relatively simple to implement. Nearly any serial algorithm for finding a convex hull can be used to find each hull, and can be easily parallelized by simply breaking up the workload appropriately. The worst case time bound is $\Omega(n log n)$ for any convex hull algorithm. The combination portion of the algorithm is most commonly done in serial, as it is a relatively quick computation.
+\subsection{Finding Sub Hulls}
+Given a set $S$ of an arbitrary number of points, and $k$ processors, $S$ is divided into $n$ equal sets. The upper and lower hulls of each set are found, and then the hulls are connected to each other in order to find a complete upper and lower hull of the entire set. The upper and lower hulls are then combined in much the same manner as in the serial algorithm. Again, the upper/lower hull algorithms are nearly identical, so we will describe only the upper hull algorithm for brevity.
 
-To begin with, the set of points is divided among its extreme edges into upper and lower hulls, allowing for calculation of each separately to be combined. This simplifies the serial algorithm, as well as provides an excellent opportunity for parallelization. The upper/lower hulls are treated in exactly the same manner, so the description which follows covers only the upper hull for expediency.
+To begin with, the set of points is divided among its extreme edges into upper and lower sets, exactly as in the serial algorithm in $O(n)$ time. Once the upper and lower sets have been found, we can begin breaking them up into $k$ disjoint subsets. This allows each to be handled with no interference. Since the set has already been ordered before beginning the algorithm, the split is trivial and can be done in place in $O(1)$ time, or in $O(n)$ time if copying. This allows a series of neighboring hulls to be found. 
 
-Once the set of points to be contained has been split, it is further divided into $n$ disjoint sets, where $n$ is your number of processors. This allows each set to be handled individually with no interference. Since the set has already been ordered, this means that each split set contains only neighboring points with no overlap between sets. What this serves to do is allow us to calculate each hull separately, knowing that there will be limited modification during the combination step.
+\subsection{Combining Sub Hulls}
+Once the neighboring hulls have been found, the trick is to combine them in a manner that takes $O(n)$ time or better. Luckily, there is a fairly simple approach which can be used that combines the sub hulls in $O(nlog(n))$ time, which will be presented below.
+
+In order to connect two hulls, a common tangent must be found. When connecting two hulls, there must be one point on each hull that is used to connect the two. The two points must form a line under which all other points in each hull fall for them to be considered within the hull. This is trivial to find generally, as the hulls should be horizontally disjoint. However, for the resulting hull to remain convex, an additional consideration must be made: that the line connecting the two hulls is a common tangent. Failing to take this into consideration, as shown in figure **a, will create a hull that is not convex.
+
+If two points, one on each hull, form a common tangent, then this means that 1) all points between them are contained underneath the tangent line, and 2) by the definition of convexity, a line is always convex. Again, this is easy to visualize as seen in figure **b.
+
+The question remains, what is a simple way to find this common tangent that is also efficient? Our approach is taken from [1]. First, we must describe how to determine if a line is a tangent. We will assume that there are two sub hulls that have already been found, which we will refer to as $p$ and $q$. We have two points $p_i$ and $q_j$, one one each hull, and want to determine if the line connecting them is a tangent to $p_i$. For the upper hull, the determination is as follows (and is reversed for the lower hull):
+
+\begin{enumerate}
+    \item Examine $p_i-1$, the point to the left of the point of interest on the hull. If it is below the line connecting $p_i$ and $q_j$, then continue. If it is above, the line is clearly not a tangent as it intersects the hull at more than on point.
+    \item Examine $p_i+1$. If it is below, then the line connecting $p_i$ and $q_j$ is a tangent to $p_i$. If it is above, then the line is not a tangent as it intersects the hull at more than one point.
+\end{enumerate} 
+
+The same method is used to determine if a point is tangent to $q_j$. Now we must determine how to move from points that do not form a tangent to points that do form a tangent. This is actually a straightforward process. If after 1), $p_i-1$ is known to be above the line connecting $p_i$ and $q_j$, then the tangent point lies to the left of $p_i$, and to the right if after 2), $p_i+1$ is known to be above the connecting line. The amount moved is determined by the size of the set and the iteration. For a set of size $s$, the first iteration would move $s/4$, the second $s/8$ and so on until the tangent points have been found. The same process is done for $q_j$, and once a line has been found which satisfies the tangent condition on both $p_i$ and $q_j$, then a common tangent line has been found.
+
+Once this common tangent line has been found, the two hulls can be easily connected. All points with x-values equal to or between the two tangent points can be removed, and the remaining points are the entirety of the convex hull which contains both sub hulls.
 
 \section{Parallelization Approach 2}
+
+\section{Results and Comparison}
+
+\section{Conclusion and Future Works}
 
 \section{References}
 \begin{thebibliography}{00}
