@@ -81,7 +81,6 @@ public class ParallelHull implements Callable {
         while(!tangentFound) {
             // if left point is below, first tangent point lies to the left
             if(!(s1.get(indS1 - 1).above(s1.get(indS1), s2.get(indS2)))) {
-                System.out.println(layer1);
                 indS1 = (int) (indS1 - max(1, s1.size() / layer1));
                 layer1 *= 2;
             } // if right point is below,  first tangent point lies to the right (assuming there is a point to right)
@@ -90,7 +89,6 @@ public class ParallelHull implements Callable {
                 layer1 *= 2;
             } // if left point is below, second tangent point lies to the left
             else if(!(s2.get(indS2 - 1).above(s1.get(indS1), s2.get(indS2)))) {
-                System.out.println(indS2);
                 indS2 = (int) (indS2 - max(1, s2.size() / layer2));
                 layer2 *= 2;
             } // if right point is below, second tangent point lies to the right (assuming there is a point to right)
@@ -322,9 +320,13 @@ public class ParallelHull implements Callable {
         ArrayList<Node> field = new ArrayList<Node>();
 
         for(int i = 0; i < 100000; i++) {
-            field.add(Randoms.getRandom(-100000, 100000));
+            field.add(Randoms.getRandom(-10000000, 10000000));
         }
-        
-        System.out.println(parallelHull(field, 2));
+
+        long startTime = System.nanoTime();
+        System.out.println(parallelHull(field, 8));
+        long endTime = System.nanoTime();
+        long totalTime = endTime - startTime;
+        System.out.println("Run time: " + totalTime / 1000);
     }
 }
