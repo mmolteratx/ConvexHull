@@ -41,8 +41,7 @@ It has been noted that despite the large number of serial algorithms for the com
     \item parallelization of iterative sequential algorithms, as examined in [3] and [4]
 \end{enumerate} 
 
-\section{Summary of Convex Hull}
-
+We implement an example of each of these algorithms, and compare them to each other, as well as to the serial algorithm which will be presented below.
 
 \section{Serial Algorithm}
 
@@ -65,6 +64,8 @@ If the $top$ element happens to be on or below the line formed by the $second$ e
 This algorithm ends when we reach the furthest most right point of the set, which means that the entire set has been evaluated since it is sorted. Once that occurs, the hull is considered found. As stated above, the lower hull algorithm proceeds in a nearly identical manner, just with opposite orientation. In the serial algorithm, the lower hull is found after the upper hull has finished. Each hull is found in $O(n)$ time. This should be obvious, as each element can be at most pushed once, and at most popped once. Once both hulls have been found, the connecting point is the left/right extremities, so combination can occur in $O(n)$ time as well if copying elements.
 
 Pseudocode:
+
+(Goes Here)
 
 As can be seen above, given a sorted set of elements, a convex hull in $O(n)$ time is trivial. However, sorting is a $O(nlog(n)$ problem at best, which dominates the run time on large datasets. As a result, comparisons will be made to the parallel algorithm only in the portion in which the hull is actually calculated. Comparison of sorting algorithms is beyond the scope of this paper.
 
@@ -92,13 +93,20 @@ The question remains, what is a simple way to find this common tangent that is a
 
 The same method is used to determine if a point is tangent to $q_j$. Now we must determine how to move from points that do not form a tangent to points that do form a tangent. This is actually a straightforward process. If after 1), $p_i-1$ is known to be above the line connecting $p_i$ and $q_j$, then the tangent point lies to the left of $p_i$, and to the right if after 2), $p_i+1$ is known to be above the connecting line. The amount moved is determined by the size of the set and the iteration. For a set of size $s$, the first iteration would move $s/4$, the second $s/8$ and so on until the tangent points have been found. The same process is done for $q_j$, and once a line has been found which satisfies the tangent condition on both $p_i$ and $q_j$, then a common tangent line has been found.
 
-Once this common tangent line has been found, the two hulls can be easily connected. All points with x-values equal to or between the two tangent points can be removed, and the remaining points are the entirety of the convex hull which contains both sub hulls.
+Once this common tangent line has been found, the two hulls can be easily connected. All points with x-values equal to or between the two tangent points can be removed, and the remaining points are the entirety of the convex hull which contains both sub hulls. This leaves both the finished upper and lower hulls, however they are still separated and not a complete convex hull for the set of planar points.
+
+Luckily, the combination of the hulls is simple. Much like the method we used to separate the original set in the first place, we only need to know the extreme horizontal points, which are shared between the upper/lower hulls. These can be found in $O(1)$ time since our points are sorted by horizontal position. In our algorithm, we take the upper hull, and append the lower hull minus these common points to it, which is a $O(n)$ operation. 
 
 \section{Parallelization Approach 2}
 
 \section{Results and Comparison}
 
+Need charts for 2, 4, 8 threads
+
+Need charts to show impact of number of points in hull; higher number of points should tilt performance more towards the parallel methods
+
 \section{Conclusion and Future Works}
+The basic divide-and-conquer strategy shows a noticeable improvement from the serial algorithm, with a speed up of up to 2x. This could be significantly improved upon with a better method for dividing the set into upper and lower hulls. The current method 
 
 \section{References}
 \begin{thebibliography}{00}
